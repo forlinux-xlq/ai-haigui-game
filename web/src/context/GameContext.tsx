@@ -1,0 +1,212 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { stories } from '../data/stories';
+import { fetchAIAnswer } from '../utils/ai';
+import type { TAIAnswer, TGameSession, TMessage, TStory } from '../types';
+
+interface IGameContext {
+  session: TGameSession;
+  lastAIAnswer: TAIAnswer | null;
+  isLoading: boolean;
+  startGame: (story: TStory) => void;
+  sendMessage: (content: string) => Promise<void>;
+  useHint: () => Promise<string | null>;
+  restartGame: () => void;
+  endGame: (type: 'win' | 'giveup') => void;
+}
+
+const STORAGE_KEY = 'ai_haigui_game_session_v1';
+
+const createEmptySession = (): TGameSession => ({
+  storyId: null,
+  surface: null,
+  bottom: null,
+  messages: [],
+  hintsUsed: 0,
+  hintsRemaining: 0,
+  questionCount: 0,
+  status: 'idle',
+});
+
+function safeParseJSON(value: string): unknown {
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function createId(): string {
+  if (typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto) {
+    return globalThis.crypto.randomUUID();
+  }
+  return `id_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function buildSessionFromStorage(stored: unknown): TGameSession | null {
+  if (!stored || typeof stored !== 'object') return null;
+  const maybe = stored as Partial<TGameSession> & { storyId?: unknown };
+  const storyId = typeof maybe.storyId === 'string' ? maybe.storyId : null;
+  if (!storyId) return null;
+
+  const story = stories.find((s) => s.id === storyId);
+  if (!story) return null;
+
+  const messages = Array.isArray(maybe.messages) ? (maybe.messages as TMessage[]) : [];
+  const hintsRemaining =
+    typeof maybe.hintsRemaining === 'number' ? maybe.hintsRemaining : story.hintCount;
+
+  return {
+    storyId,
+    surface: story.surface,
+    bottom: story.bottom,
+    messages,
+    hintsUsed: typeof maybe.hintsUsed === 'number' ? maybe.hintsUsed : 0,
+    hintsRemaining,
+    questionCount: typeof maybe.questionCount === 'number' ? maybe.questionCount : 0,
+    status: maybe.status === 'finished' || maybe.status === 'playing' ? maybe.status : 'playing',
+    startTime: typeof maybe.startTime === 'number' ? maybe.startTime : Date.now(),
+    endTime: typeof maybe.endTime === 'number' ? maybe.endTime : undefined,
+  };
+}
+
+export const GameContext = React.createContext<IGameContext | null>(null);
+
+export function GameProvider({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<TGameSession>(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return createEmptySession();
+    const parsed = safeParseJSON(raw);
+    return buildSessionFromStorage(parsed) ?? createEmptySession();
+  });
+
+  const [lastAIAnswer, setLastAIAnswer] = useState<TAIAnswer | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 持久化：用于刷新不丢消息（MVP）。
+  useEffect(() => {
+    const toStore = {
+      ...session,
+      // 防止把汤底直接暴露给恶意访问者（虽然本地可被开发者工具看到，本意仍是降低作弊）。
+      bottom: null,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+  }, [session]);
+
+  const startGame = useCallback((story: TStory) => {
+    setLastAIAnswer(null);
+    setIsLoading(false);
+    setSession({
+      storyId: story.id,
+      surface: story.surface,
+      bottom: story.bottom,
+      messages: [],
+      hintsUsed: 0,
+      hintsRemaining: story.hintCount,
+      questionCount: 0,
+      status: 'playing',
+      startTime: Date.now(),
+      endTime: undefined,
+    });
+  }, []);
+
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim()) return;
+      if (isLoading) return;
+      if (!session.storyId || !session.bottom || !session.surface) return;
+
+      const question = content.trim();
+      const story = stories.find((s) => s.id === session.storyId);
+      if (!story) return;
+
+      const userMessage: TMessage = {
+        id: createId(),
+        role: 'user',
+        content: question,
+        timestamp: Date.now(),
+        status: 'sent',
+      };
+
+      setIsLoading(true);
+      setSession((prev) => ({
+        ...prev,
+        messages: [...prev.messages, userMessage],
+        questionCount: prev.questionCount + 1,
+      }));
+
+      try {
+        const answer = await fetchAIAnswer({
+          surface: story.surface,
+          bottom: story.bottom,
+          question,
+        });
+
+        const assistantMessage: TMessage = {
+          id: createId(),
+          role: 'assistant',
+          content: answer,
+          timestamp: Date.now(),
+          status: 'sent',
+        };
+
+        setLastAIAnswer(answer);
+        setSession((prev) => ({
+          ...prev,
+          messages: [...prev.messages, assistantMessage],
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, session.bottom, session.surface, session.storyId],
+  );
+
+  const useHint = useCallback(async () => {
+    if (isLoading) return null;
+    if (!session.storyId) return null;
+    if (session.hintsRemaining <= 0) return null;
+
+    setSession((prev) => ({
+      ...prev,
+      hintsUsed: prev.hintsUsed + 1,
+      hintsRemaining: Math.max(0, prev.hintsRemaining - 1),
+    }));
+
+    // MVP 占位：后续可由 AI 生成暗示。
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    return '提示暂不可用（占位版）';
+  }, [isLoading, session.hintsRemaining, session.storyId]);
+
+  const restartGame = useCallback(() => {
+    if (!session.storyId) return;
+    const story = stories.find((s) => s.id === session.storyId);
+    if (!story) return;
+    startGame(story);
+  }, [session.storyId, startGame]);
+
+  const endGame = useCallback((type: 'win' | 'giveup') => {
+    setSession((prev) => ({
+      ...prev,
+      status: 'finished',
+      endTime: Date.now(),
+    }));
+    setLastAIAnswer(type === 'win' ? '是' : null);
+  }, []);
+
+  const value = useMemo<IGameContext>(
+    () => ({
+      session,
+      lastAIAnswer,
+      isLoading,
+      startGame,
+      sendMessage,
+      useHint,
+      restartGame,
+      endGame,
+    }),
+    [endGame, isLoading, lastAIAnswer, restartGame, sendMessage, session, startGame, useHint],
+  );
+
+  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
+}
+
