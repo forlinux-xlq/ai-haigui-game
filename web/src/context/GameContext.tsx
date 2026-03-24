@@ -111,13 +111,27 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const sendMessage = useCallback(
     async (content: string) => {
-      if (!content.trim()) return;
-      if (isLoading) return;
-      if (!session.storyId || !session.bottom || !session.surface) return;
+      console.log('发送消息:', content);
+      
+      if (!content.trim()) {
+        console.log('消息为空，不发送');
+        return;
+      }
+      if (isLoading) {
+        console.log('正在加载中，不发送消息');
+        return;
+      }
+      if (!session.storyId || !session.bottom || !session.surface) {
+        console.log('游戏会话不完整，不发送消息');
+        return;
+      }
 
       const question = content.trim();
       const story = stories.find((s) => s.id === session.storyId);
-      if (!story) return;
+      if (!story) {
+        console.log('未找到故事，不发送消息');
+        return;
+      }
 
       const userMessage: TMessage = {
         id: createId(),
@@ -127,6 +141,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         status: 'sent',
       };
 
+      console.log('添加用户消息:', userMessage);
       setIsLoading(true);
       setSession((prev) => ({
         ...prev,
@@ -135,12 +150,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }));
 
       try {
+        console.log('正在获取 AI 回答...');
         const answer = await fetchAIAnswer({
           surface: story.surface,
           bottom: story.bottom,
           question,
         });
 
+        console.log('获取到 AI 回答:', answer);
         const assistantMessage: TMessage = {
           id: createId(),
           role: 'assistant',
@@ -155,6 +172,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           messages: [...prev.messages, assistantMessage],
         }));
       } catch (error) {
+        console.error('获取 AI 回答失败:', error);
         // 处理错误，显示友好提示
         const errorMessage: TMessage = {
           id: createId(),
@@ -171,6 +189,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           messages: [...prev.messages, errorMessage],
         }));
       } finally {
+        console.log('消息发送完成，重置加载状态');
         setIsLoading(false);
       }
     },
