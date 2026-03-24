@@ -69,20 +69,13 @@ export default function StoryReveal({
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <div className="mt-6">
               <button
                 type="button"
                 onClick={onRestart}
-                className="min-h-[44px] flex-1 rounded-lg bg-amber-500 text-slate-950 font-semibold px-4 py-2 hover:bg-amber-400 transition-all duration-300"
+                className="min-h-[44px] w-full rounded-lg bg-amber-500 text-slate-950 font-semibold px-4 py-2 hover:bg-amber-400 transition-all duration-300"
               >
                 再来一局
-              </button>
-              <button
-                type="button"
-                onClick={onHome}
-                className="min-h-[44px] flex-1 rounded-lg bg-slate-700 text-slate-100 font-semibold px-4 py-2 hover:bg-slate-600 transition-all duration-300"
-              >
-                返回上一页
               </button>
             </div>
           </div>

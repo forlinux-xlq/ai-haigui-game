@@ -154,6 +154,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           messages: [...prev.messages, assistantMessage],
         }));
+      } catch (error) {
+        // 处理错误，显示友好提示
+        const errorMessage: TMessage = {
+          id: createId(),
+          role: 'assistant',
+          content: error instanceof Error && error.message.includes('不符合规范') 
+            ? 'AI 回答不符合规范，请重新提问' 
+            : 'AI 暂时无法回答，请稍后重试',
+          timestamp: Date.now(),
+          status: 'error',
+        };
+
+        setSession((prev) => ({
+          ...prev,
+          messages: [...prev.messages, errorMessage],
+        }));
       } finally {
         setIsLoading(false);
       }

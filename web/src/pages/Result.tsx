@@ -13,6 +13,17 @@ export default function Result() {
 
   const { session, restartGame } = useGame();
 
+  // 随机选择一个不同的故事
+  const getRandomStory = useMemo(() => {
+    if (!story) return null;
+    // 过滤掉当前故事
+    const otherStories = stories.filter(s => s.id !== story.id);
+    if (otherStories.length === 0) return story; // 如果只有一个故事，返回当前故事
+    // 随机选择一个
+    const randomIndex = Math.floor(Math.random() * otherStories.length);
+    return otherStories[randomIndex];
+  }, [story]);
+
   useEffect(() => {
     if (!story) {
       navigate('/', { replace: true });
@@ -37,8 +48,11 @@ export default function Result() {
         time: timeSeconds,
       }}
       onRestart={() => {
-        restartGame();
-        navigate(`/game?story=${encodeURIComponent(story.id)}`);
+        const randomStory = getRandomStory;
+        if (randomStory) {
+          restartGame();
+          navigate(`/game?story=${encodeURIComponent(randomStory.id)}`);
+        }
       }}
       onHome={() => navigate(`/difficulty/${story.difficulty}`, { replace: true })}
     />
