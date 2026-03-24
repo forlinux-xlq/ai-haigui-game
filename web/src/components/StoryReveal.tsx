@@ -23,6 +23,24 @@ export default function StoryReveal({
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+          {/* 按钮区域 - 位于最上端 */}
+          <div className="p-4 border-b border-slate-700 bg-slate-900/30 flex justify-start gap-3">
+            <button
+              type="button"
+              onClick={onHome}
+              className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
+            >
+              返回上页
+            </button>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/'}
+              className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
+            >
+              结束游戏
+            </button>
+          </div>
+          
           <div className="p-5 border-b border-slate-700 bg-slate-900/30">
             <h1 className="text-2xl font-bold text-amber-400 mb-2">真相揭晓</h1>
             <p className="text-slate-300 text-sm">

@@ -40,7 +40,7 @@ export default function Result() {
         restartGame();
         navigate(`/game?story=${encodeURIComponent(story.id)}`);
       }}
-      onHome={() => navigate(`/game?story=${encodeURIComponent(story.id)}`, { replace: true })}
+      onHome={() => navigate(`/difficulty/${story.difficulty}`, { replace: true })}
     />
   );
 }

@@ -29,7 +29,7 @@ export default function DifficultyList() {
   if (!difficulty) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-screen text-slate-100 relative overflow-hidden bg-slate-950">
+    <div className="min-h-screen text-slate-100 relative overflow-hidden bg-slate-950 flex items-center justify-center">
       {/* 背景：保持与首页一致的雾光氛围 */}
       <div
         aria-hidden="true"
@@ -48,23 +48,32 @@ export default function DifficultyList() {
         className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"
       />
 
-      <main className="relative max-w-6xl w-full mx-auto px-4 pb-10 sm:px-8 pt-10">
+      <main className="relative max-w-6xl w-full mx-auto px-4 py-10 sm:px-8">
         <section className="rounded-2xl border border-white/10 bg-slate-800/30 backdrop-blur-md shadow-xl p-4 sm:p-6 lg:p-8">
-          <div className="flex items-center justify-between gap-4 mb-4">
+          {/* 按钮区域 - 位于最上端 */}
+          <div className="flex justify-start gap-3 mb-4">
+            <button
+              type="button"
+              onClick={() => navigate('/?mode=list', { replace: true })}
+              className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
+            >
+              返回上页
+            </button>
             <button
               type="button"
               onClick={() => navigate('/', { replace: true })}
               className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
             >
-              返回
+              结束游戏
             </button>
-            <div className="flex-1 text-center">
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-100">
-                {DIFFICULTY_LABEL[difficulty]}难度列表
-              </h2>
-              <div className="text-xs text-slate-400">共 {filteredStories.length} 则</div>
-            </div>
-            <div className="w-[80px]" aria-hidden="true" />
+          </div>
+          
+          {/* 标题区域 */}
+          <div className="text-center mb-6">
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-100">
+              {DIFFICULTY_LABEL[difficulty]}难度列表
+            </h2>
+            <div className="text-xs text-slate-400">共 {filteredStories.length} 则</div>
           </div>
 
           {/* 响应式网格：减少留白，尽量让内容紧凑填充 */}

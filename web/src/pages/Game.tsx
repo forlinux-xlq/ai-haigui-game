@@ -35,25 +35,36 @@ export default function Game() {
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-8">
       <div className="max-w-5xl w-full mx-auto flex flex-col gap-4">
         <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-4">
-          <div className="flex items-start justify-between gap-4">
+          {/* 按钮区域 - 位于最上端 */}
+          <div className="flex justify-start gap-3 mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (story) navigate(`/difficulty/${story.difficulty}`, { replace: true });
+                else navigate('/?mode=list', { replace: true });
+              }}
+              className="min-h-[44px] px-3 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
+            >
+              返回上页
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/', { replace: true })}
+              className="min-h-[44px] px-5 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
+            >
+              结束游戏
+            </button>
+          </div>
+          
+          <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex-1">
-              <button
-                type="button"
-                onClick={() => {
-                  if (story) navigate(`/difficulty/${story.difficulty}`, { replace: true });
-                  else navigate('/', { replace: true });
-                }}
-                className="min-h-[44px] px-3 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300 mb-3"
-              >
-                返回上层
-              </button>
               <h2 className="text-xl font-bold text-amber-400">汤面故事</h2>
               <p className="mt-2 text-slate-200 whitespace-pre-wrap">{session.surface ?? story?.surface}</p>
             </div>
             {story ? <DifficultyBadge difficulty={story.difficulty} /> : null}
           </div>
 
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
             <div className="md:col-span-1">
               <HintButton remaining={session.hintsRemaining} disabled={isLoading} onUse={useHint} />
             </div>
@@ -65,13 +76,6 @@ export default function Game() {
                 disabled={!story}
               >
                 查看汤底
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/', { replace: true })}
-                className="min-h-[44px] px-5 rounded-lg bg-slate-700 text-slate-100 font-semibold disabled:opacity-50 hover:bg-slate-600 transition-all duration-300"
-              >
-                结束游戏
               </button>
             </div>
           </div>

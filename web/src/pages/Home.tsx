@@ -1,11 +1,20 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { stories } from '../data/stories';
 import type { TGameDifficulty } from '../types';
 
 export default function Home() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<'intro' | 'list'>('intro');
+
+  // 从 URL 参数中获取 mode
+  useEffect(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'list') {
+      setMode('list');
+    }
+  }, [searchParams]);
 
   const totalCount = useMemo(() => stories.length, []);
 
@@ -99,8 +108,8 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <main className="relative max-w-6xl w-full mx-auto px-4 pb-10 sm:px-8 z-10">
-          <section className="rounded-2xl border border-white/10 bg-slate-800/30 backdrop-blur-md shadow-xl p-4 sm:p-6 lg:p-8">
+        <main className="relative max-w-6xl w-full mx-auto px-4 sm:px-8 z-10 min-h-screen flex items-center justify-center">
+          <section className="rounded-2xl border border-white/10 bg-slate-800/30 backdrop-blur-md shadow-xl p-4 sm:p-6 lg:p-8 w-full relative">
             {/* 列表界面：只显示难度选择（放大居中、尽量减少留白） */}
             <div className="min-h-[420px] flex flex-col items-center justify-center text-center">
               <h2 className="text-2xl sm:text-3xl font-semibold text-slate-100 mb-6">
@@ -155,6 +164,17 @@ export default function Home() {
               <div className="mt-6 text-xs text-slate-300/60">
                 选择难度后跳转到对应海龟汤列表
               </div>
+            </div>
+            
+            {/* 结束游戏按钮 */}
+            <div className="absolute bottom-4 right-4">
+              <button
+                type="button"
+                onClick={() => setMode('intro')}
+                className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
+              >
+                结束游戏
+              </button>
             </div>
           </section>
         </main>
