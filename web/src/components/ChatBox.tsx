@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { TMessage } from '../types';
 import MessageBubble from './MessageBubble';
+import { useSound } from '../hooks/useSound';
 
 interface IChatBoxProps {
   messages: TMessage[];
@@ -12,6 +13,7 @@ interface IChatBoxProps {
 export default function ChatBox({ messages, onSend, disabled }: IChatBoxProps) {
   const [content, setContent] = useState('');
   const listRef = useRef<HTMLDivElement | null>(null);
+  const { playSound } = useSound();
 
   const canSend = useMemo(() => content.trim().length > 0 && !disabled, [content, disabled]);
 
@@ -27,6 +29,7 @@ export default function ChatBox({ messages, onSend, disabled }: IChatBoxProps) {
     if (!canSend) return;
     const next = content.trim();
     setContent('');
+    playSound('/sounds/button-click.mp3');
     await onSend(next);
   };
 

@@ -5,6 +5,7 @@ import DifficultyBadge from '../components/DifficultyBadge';
 import HintButton from '../components/HintButton';
 import { stories } from '../data/stories';
 import { useGame } from '../hooks/useGame';
+import { useSound } from '../hooks/useSound';
 
 export default function Game() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Game() {
   const story = storyId ? stories.find((s) => s.id === storyId) : undefined;
 
   const { session, startGame, sendMessage, useHint, isLoading, endGame } = useGame();
+  const { playSound } = useSound();
 
   useEffect(() => {
     if (!story) {
@@ -27,6 +29,7 @@ export default function Game() {
   }, [navigate, startGame, session.storyId, story]);
 
   const handleViewBottom = () => {
+    playSound('/sounds/button-click.mp3');
     endGame('giveup');
     navigate(`/result?story=${encodeURIComponent(story?.id ?? '')}`);
   };
@@ -40,6 +43,7 @@ export default function Game() {
             <button
               type="button"
               onClick={() => {
+                playSound('/sounds/button-click.mp3');
                 if (story) navigate(`/difficulty/${story.difficulty}`, { replace: true });
                 else navigate('/?mode=list', { replace: true });
               }}
@@ -49,7 +53,10 @@ export default function Game() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/', { replace: true })}
+              onClick={() => {
+                playSound('/sounds/button-click.mp3');
+                navigate('/', { replace: true });
+              }}
               className="min-h-[44px] px-5 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
             >
               结束游戏

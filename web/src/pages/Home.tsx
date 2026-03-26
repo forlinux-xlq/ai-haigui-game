@@ -2,11 +2,13 @@ import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { stories } from '../data/stories';
 import type { TGameDifficulty } from '../types';
+import { useSound } from '../hooks/useSound';
 
 export default function Home() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<'intro' | 'list'>('intro');
+  const { playSound } = useSound();
 
   // 从 URL 参数中获取 mode
   useEffect(() => {
@@ -30,6 +32,7 @@ export default function Home() {
 
   const handleSelectDifficulty = (difficulty: TGameDifficulty) => {
     // 从“海龟汤列表”界面直接跳转，原界面消失（不再展示故事网格）。
+    playSound('/sounds/button-click.mp3');
     navigate(`/difficulty/${difficulty}`);
   };
 
@@ -93,7 +96,10 @@ export default function Home() {
 
             <button
               type="button"
-              onClick={() => setMode('list')}
+              onClick={() => {
+                playSound('/sounds/button-click.mp3');
+                setMode('list');
+              }}
               className="mt-10 mx-auto min-h-[48px] px-8 rounded-2xl bg-cyan-400/90 text-slate-950 font-semibold
                          shadow-[0_0_0_1px_rgba(56,189,248,0.25),0_0_26px_rgba(34,211,238,0.35)]
                          hover:bg-cyan-400 transition-all duration-300"
@@ -170,7 +176,10 @@ export default function Home() {
             <div className="absolute bottom-4 right-4">
               <button
                 type="button"
-                onClick={() => setMode('intro')}
+                onClick={() => {
+                  playSound('/sounds/button-click.mp3');
+                  setMode('intro');
+                }}
                 className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
               >
                 结束游戏

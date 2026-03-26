@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSound } from '../hooks/useSound';
 
 interface IHintButtonProps {
   remaining: number;
@@ -8,8 +9,10 @@ interface IHintButtonProps {
 
 export default function HintButton({ remaining, disabled, onUse }: IHintButtonProps) {
   const [hintText, setHintText] = useState<string | null>(null);
+  const { playSound } = useSound();
 
   const handleUse = async () => {
+    playSound('/sounds/button-click.mp3');
     setHintText(null);
     const text = await onUse();
     setHintText(text);

@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import GameCard from '../components/GameCard';
 import { stories } from '../data/stories';
 import type { TGameDifficulty } from '../types';
+import { useSound } from '../hooks/useSound';
 
 const DIFFICULTY_LABEL: Record<TGameDifficulty, string> = {
   easy: '简单',
@@ -18,6 +19,7 @@ function parseDifficulty(value: string | undefined): TGameDifficulty | null {
 export default function DifficultyList() {
   const params = useParams();
   const navigate = useNavigate();
+  const { playSound } = useSound();
 
   const difficulty = parseDifficulty(params.difficulty);
 
@@ -54,14 +56,20 @@ export default function DifficultyList() {
           <div className="flex justify-start gap-3 mb-4">
             <button
               type="button"
-              onClick={() => navigate('/?mode=list', { replace: true })}
+              onClick={() => {
+                playSound('/sounds/button-click.mp3');
+                navigate('/?mode=list', { replace: true });
+              }}
               className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
             >
               返回上页
             </button>
             <button
               type="button"
-              onClick={() => navigate('/', { replace: true })}
+              onClick={() => {
+                playSound('/sounds/button-click.mp3');
+                navigate('/', { replace: true });
+              }}
               className="min-h-[44px] px-4 rounded-lg bg-slate-700 text-slate-100 font-semibold hover:bg-slate-600 transition-all duration-300"
             >
               结束游戏
@@ -87,7 +95,10 @@ export default function DifficultyList() {
                 />
                 <GameCard
                   story={s}
-                  onClick={() => navigate(`/game?story=${encodeURIComponent(s.id)}`)}
+                  onClick={() => {
+                    playSound('/sounds/button-click.mp3');
+                    navigate(`/game?story=${encodeURIComponent(s.id)}`);
+                  }}
                 />
               </div>
             ))}
