@@ -1,12 +1,7 @@
 import { useCallback } from 'react';
 
-interface ISoundOptions {
-  volume?: number;
-  loop?: boolean;
-}
-
 export function useSound() {
-  const playSound = useCallback((soundPath: string, options: ISoundOptions = {}) => {
+  const playSound = useCallback((_soundPath: string, _options: any = {}) => {
     try {
       // 创建一个简单的提示音
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
