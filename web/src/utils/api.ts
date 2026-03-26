@@ -1,7 +1,7 @@
 import type { TStory } from '../types';
 
 // 使用环境变量配置 API 基础 URL，默认值为本地开发路径
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/chat';
+const API_BASE_URL = import.meta.env.VITE_AI_API_URL || '/api/chat';
 
 /**
  * 向 AI 提问关于海龟汤故事的问题
