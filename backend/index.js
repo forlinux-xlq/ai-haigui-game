@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+// dotenv is used for local development only; in Railway, env vars are injected
+// directly into process.env and do not require a .env file.
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const API_KEY = process.env.DEEPSEEK_API_KEY;
 
 // 配置 CORS
 app.use(cors({
@@ -48,6 +49,7 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
+    const API_KEY = process.env.DEEPSEEK_API_KEY;
     if (!API_KEY) {
       console.log('API Key 未配置');
       return res.status(500).json({
